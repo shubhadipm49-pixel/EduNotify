@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Bell, BookOpen, Users, Zap, CheckCircle, Eye, EyeOff, ArrowRight, GraduationCap } from 'lucide-react';
-import {useNavigate} from 'react-router-dom'
+import {useNavigate,Link} from 'react-router-dom'
 
 export default function TeacherLogin() {
   const navigate = useNavigate()
@@ -203,7 +203,7 @@ export default function TeacherLogin() {
 
           <div className="mt-6 pt-6 border-t border-emerald-700/50 text-center">
             <p className="text-sm text-emerald-400">
-              Student? <button className="text-emerald-300 hover:text-emerald-200 font-semibold">Login here</button>
+              Student? <Link to={"/studentlogin"} className="text-emerald-300 hover:text-emerald-200 font-semibold">Login here</Link>
             </p>
           </div>
         </div>

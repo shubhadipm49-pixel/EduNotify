@@ -80,11 +80,32 @@ export default function UploadNoticePage() {
     setIsLoading(true);
     setIsSuccess(false);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const payload = {
+        heading: formData.heading,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority,
+        targetAudience: formData.targetAudience,
+        fileUrl: null,
+        authorEmail: localStorage.getItem('teacherEmail') || undefined,
+      };
+
+      const res = await fetch('http://localhost:3000/notices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to post notice');
+      }
+
+      await res.json();
       setIsLoading(false);
       setIsSuccess(true);
-      
+
       // Auto close after 2 seconds
       setTimeout(() => {
         setShowDialog(false);
@@ -98,7 +119,12 @@ export default function UploadNoticePage() {
         });
         setUploadedFile(null);
       }, 2000);
-    }, 2000);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+      setShowDialog(false);
+      alert(error.message);
+    }
   };
 
   const getFileIcon = (file) => {

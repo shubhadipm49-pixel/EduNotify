@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, Search, Filter, Download, Eye, ThumbsUp, Clock, AlertCircle, BookOpen, Calendar, User, X } from 'lucide-react';
 import StudentNavbar from './StudentNavbar'
 
@@ -6,56 +6,7 @@ export default function ViewNoticePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('latest');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [notices, setNotices] = useState([
-    {
-      id: 1,
-      title: 'Mid-Term Examination Schedule',
-      content: 'The mid-term examinations will be conducted from March 15-22. All students must carry their ID cards.',
-      date: '2025-03-01',
-      category: 'Academics',
-      priority: 'important',
-      author: 'Prof. John Smith',
-      seen: false,
-      liked: false,
-      likes: 24
-    },
-    {
-      id: 2,
-      title: 'Sports Day Announcement',
-      content: 'Annual sports day will be held on March 25. Registration for events closes on March 10.',
-      date: '2025-02-28',
-      category: 'Events',
-      priority: 'normal',
-      author: 'Sports Committee',
-      seen: true,
-      liked: true,
-      likes: 45
-    },
-    {
-      id: 3,
-      title: 'Library Timings Updated',
-      content: 'New library timings: Monday-Friday 8AM-8PM, Saturday 9AM-5PM. Sunday closed.',
-      date: '2025-02-25',
-      category: 'General',
-      priority: 'normal',
-      author: 'Library Staff',
-      seen: true,
-      liked: false,
-      likes: 12
-    },
-    {
-      id: 4,
-      title: 'Holiday Notice - Holi',
-      content: 'The institution will remain closed from March 8-10 for Holi festival.',
-      date: '2025-02-20',
-      category: 'Holiday',
-      priority: 'important',
-      author: 'Administration',
-      seen: false,
-      liked: false,
-      likes: 67
-    }
-  ]);
+  const [notices, setNotices] = useState([]);
 
   const filterOptions = [
     { value: 'latest', label: 'Latest First', icon: <Clock size={16} /> },
@@ -84,6 +35,34 @@ export default function ViewNoticePage() {
     console.log('Downloading notice:', notice.title);
     alert(`Downloading: ${notice.title}`);
   };
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        const audience = localStorage.getItem('studentAudience') || 'all';
+        const res = await fetch(`http://localhost:3000/notices?audience=${encodeURIComponent(audience)}`);
+        if (!res.ok) throw new Error('Failed to fetch notices');
+        const data = await res.json();
+        // Map backend to UI shape
+        const mapped = (data.notices || []).map((n) => ({
+          id: n._id,
+          title: n.heading,
+          content: n.description,
+          date: n.createdAt,
+          category: n.category,
+          priority: n.priority,
+          author: n.authorEmail || 'Teacher',
+          seen: false,
+          liked: false,
+          likes: 0,
+        }));
+        setNotices(mapped);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchNotices();
+  }, []);
 
   const filteredNotices = notices
     .filter(notice => 
